@@ -168,3 +168,4 @@ D:\azurewebsites\backend\src\Sales.Api\obj\Release\net8.0\refint\Sales.Api.dll
 D:\azurewebsites\backend\src\Sales.Api\obj\Release\net8.0\Sales.Api.pdb
 D:\azurewebsites\backend\src\Sales.Api\obj\Release\net8.0\Sales.Api.genruntimeconfig.cache
 D:\azurewebsites\backend\src\Sales.Api\obj\Release\net8.0\ref\Sales.Api.dll
+D:\azurewebsites\backend\src\Sales.Api\obj\Release\net8.0\Sales.Api.sourcelink.json

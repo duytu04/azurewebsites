@@ -89,34 +89,36 @@ Sau khi backend và frontend đều chạy, bạn có thể đăng nhập, quả
 
 ## Triển Khai Frontend Lên Azure Storage (Static Website)
 
-1. **Chuẩn bị**
-   - Azure Storage Account (đa số gói đều hỗ trợ Static Website, trừ một số SKU cũ).
-   - `npm run build` đã tạo thư mục `web-build/` (hoặc `dist/`) chứa bundle.
+1. **Chuẩn bị build**
+   - Trong `frontend/`, chạy `npm install` (lần đầu) rồi `npm run build`. Lệnh build dùng `.env.production` để trỏ API về backend đã deploy; Vite xuất bundle với đường dẫn tuyệt đối nên phù hợp cho Static Website.
+   - Thư mục kết quả `frontend/web-build/` chứa toàn bộ file cần upload.
 
 2. **Bật Static Website**
-   - Azure Portal → Storage Account → *Frontend đã chọn* → `Static website` → Enable.
+   - Azure Portal → Storage Account → dịch vụ bạn chọn → `Static website` → Enable.
    - `Index document name`: `index.html`.
-   - `Error document path`: `index.html` (SPA cần redirect về index khi 404).
+   - `Error document path`: `index.html` (để SPA tự xử lý routing).
 
 3. **Upload bundle**
-   - Trong cổng portal chọn **Upload** ở giao diện Static Website → chọn tất cả file trong thư mục build (`web-build/`), upload lên container `$web`.
-   - Hoặc dùng Azure CLI:
+   - Portal: vào container `$web` → **Upload** → chọn toàn bộ nội dung trong `frontend/web-build/`.
+   - Hoặc Azure CLI:
      ```bash
      az storage blob upload-batch \
        --account-name <account> \
        --destination '$web' \
-       --source frontend/web-build
+       --source frontend/web-build \
+       --no-progress
      ```
-   - Với CLI, cần cung cấp connection string hoặc đã đăng nhập (`az login`).
+     (cần `az login` hoặc chuỗi kết nối qua tham số `--connection-string`).
 
 4. **Kết nối backend**
-   - Đảm bảo `VITE_API_BASE_URL` đã build trỏ về backend (ví dụ `https://<api-app>.azurewebsites.net`).
-   - Cấu hình CORS ở backend cho domain Static Website (`https://<account>.z<#>.web.core.windows.net`).
+   - Đảm bảo backend cho phép CORS với domain Static Website (`https://<account>.z<#>.web.core.windows.net`).
+   - Nếu backend đổi domain, cập nhật lại `.env.production` rồi build lại.
 
 5. **Kiểm tra**
-   - Portal hiển thị URL Public (`https://<account>.z<#>.web.core.windows.net`). Mở và kiểm tra SPA gọi API thành công.
+   - URL public hiển thị ngay trong mục Static Website. Mở và xác minh các request tới API thành công.
 
-> Nếu cần rewrite hoặc cấu hình auth nâng cao, thêm file `staticwebapp.config.json` (không bắt buộc với storage account) hoặc dùng CDN/Azure Front Door.
+> Nếu cần rewrite hoặc auth nâng cao, cân nhắc Azure CDN/Azure Front Door; Storage Account không hỗ trợ cấu hình rewrite ngoài việc trả `index.html` cho 404.
+
 ## Triển Khai Frontend Lên Render
 
 1. Đảm bảo mã nguồn đã được push lên repository mà Render truy cập được (GitHub/GitLab/Bitbucket).
@@ -129,4 +131,6 @@ Sau khi backend và frontend đều chạy, bạn có thể đăng nhập, quả
 6. Kiểm tra URL Render cung cấp, xác minh các request API thành công. Đừng quên bật CORS cho domain Render ở backend (nếu backend có chính sách CORS).
 
 > Nếu chọn cấu hình thủ công (Static Site), nhớ nhập đúng build command/publish directory ở bước 3 và thêm mục rewrite `/* -> /index.html` trong phần **Advanced > Redirects/Rewrites**.
+
+
 

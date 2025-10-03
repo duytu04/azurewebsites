@@ -60,7 +60,7 @@ public class AuthService : IAuthService
         await _dbContext.Users.AddAsync(user, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        return CreateAuthResponse(user);
+        return await CreateAuthResponseAsync(user, cancellationToken);
     }
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
@@ -84,10 +84,22 @@ public class AuthService : IAuthService
             throw new UnauthorizedAccessException("Invalid credentials.");
         }
 
-        return CreateAuthResponse(user);
+        return await CreateAuthResponseAsync(user, cancellationToken);
     }
 
-    private AuthResponse CreateAuthResponse(AppUser user)
+    private async Task<UserRole> EnsureValidRoleAsync(AppUser user, CancellationToken cancellationToken)
+    {
+        if (!Enum.IsDefined(typeof(UserRole), user.Role))
+        {
+            user.Role = UserRole.Admin;
+            _dbContext.Users.Update(user);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+
+        return user.Role;
+    }
+
+    private async Task<AuthResponse> CreateAuthResponseAsync(AppUser user, CancellationToken cancellationToken)
     {
         var signingKey = _jwtOptions.SigningKey;
 
@@ -95,6 +107,9 @@ public class AuthService : IAuthService
         {
             throw new InvalidOperationException("JWT signing key is not configured.");
         }
+
+        var role = await EnsureValidRoleAsync(user, cancellationToken);
+        var roleName = role.ToString();
 
         var now = DateTimeOffset.UtcNow;
         var expires = now.AddMinutes(_jwtOptions.ExpiryMinutes <= 0 ? 120 : _jwtOptions.ExpiryMinutes);
@@ -104,7 +119,7 @@ public class AuthService : IAuthService
             new(JwtRegisteredClaimNames.Email, user.Email),
             new(ClaimTypes.Email, user.Email),
             new(ClaimTypes.Name, user.FullName),
-            new(ClaimTypes.Role, user.Role.ToString())
+            new(ClaimTypes.Role, roleName)
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKey));
@@ -120,6 +135,6 @@ public class AuthService : IAuthService
 
         var token = new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
 
-        return new AuthResponse(token, expires, user.Email, user.FullName, user.Role.ToString());
+        return new AuthResponse(token, expires, user.Email, user.FullName, roleName);
     }
 }

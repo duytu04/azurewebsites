@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -37,8 +37,14 @@ builder.Services.AddCors(options =>
         var origins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
         if (origins.Length == 0)
         {
-            origins = ["http://localhost:3000", "http://localhost:5173"];
+            origins = [
+                "http://localhost:3000",
+                "http://localhost:5173",
+                "https://azurewebsitesduytu-gqgeapagexemdhbr.southeastasia-01.azurewebsites.net",
+                "https://azurewebsites01.z23.web.core.windows.net"
+            ];
         }
+
 
         policy.WithOrigins(origins)
               .AllowAnyHeader()
@@ -102,3 +108,5 @@ var databaseOptions = configuration.GetSection(DatabaseOptions.SectionName).Get<
 await DatabaseInitializer.InitializeAsync(app.Services, databaseOptions);
 
 await app.RunAsync();
+
+
