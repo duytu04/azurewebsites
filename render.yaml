@@ -1,9 +1,10 @@
 services:
-  - type: static_site
+  - type: static
     name: sales-frontend
     env: static
     rootDir: frontend
-    buildCommand: npm install && npm run build
+    installCommand: npm install
+    buildCommand: npm run build
     staticPublishPath: web-build
     routes:
       - type: rewrite
