@@ -1,0 +1,5 @@
+{
+  "appService.preDeployTask": "publish-release",
+"appService.deploySubpath": "backend\\publish",
+"appService.defaultWebAppToDeploy": "/subscriptions/c7018e23-4881-4fce-b3c3-a70c59ff20f8/resourceGroups/appsvc_windows_southeastasia/providers/Microsoft.Web/sites/azurewebsitesduytu"
+}

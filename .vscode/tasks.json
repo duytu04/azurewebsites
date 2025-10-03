@@ -1,0 +1,17 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "publish-release",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "publish",
+        "${workspaceFolder}/backend/src/Sales.Api",
+        "-c", "Release",
+        "-o", "${workspaceFolder}/backend/publish"
+      ],
+      "problemMatcher": "$msCompile"
+    }
+  ]
+}
